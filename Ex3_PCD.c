@@ -177,6 +177,8 @@ int main (int argc, char *argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
+	printf("Hello from process %d. Initiating operation. Upper process: %d; Lower process: %d.\n ", world_rank, (world_rank + world_size - 1) % world_size, (world_rank + 1) % world_size);
+
 	lineCount = (GRID_SIZE / world_size);
 	lineStart = world_rank * lineCount;
 	/* Initialize the arrays */
@@ -211,7 +213,7 @@ int main (int argc, char *argv[]) {
 			}
 			for (i = 0; i < lineCount; i++) {
 				for (j = 0; j < GRID_SIZE; j++) {
-					//printf("[%d: %d, %d]\n", world_rank, i + lineStart, j);
+					//printf("[%d: %d, %d]\n", world_rank, i + lineStart, j);.
 					nextCells[i][j] = calcMeanNeighbours(&cells, &upperBorder, &lowerBorder, i, j, lineStart, lineCount, world_rank, world_size);
 				}
 			}
@@ -244,10 +246,10 @@ int main (int argc, char *argv[]) {
 	local_sum = countLivingCells(&cells, world_rank, lineStart, lineCount);
 	MPI_Reduce(&local_sum, &global_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 	if (world_rank == 0) {
-		printf("[FINAL CELL COUNT FOR RANK %d: %d\n] ", world_rank, global_sum);
+		printf("[FINAL CELL COUNT FOR RANK %d: %d]\n ", world_rank, global_sum);
 	}
 	gettimeofday(&end, NULL);
-	printf("Time taken: %.6f seconds.\n", time_diff(&start, &end));
+	printf("Time taken for proc %d: %.6f seconds.\n", world_rank, time_diff(&start, &end));
 
 	/* Free the arrays */
 	for (i = 0; i < lineCount; i++) {
